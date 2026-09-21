@@ -1,0 +1,145 @@
+[project]
+name = "agent"
+version = "0.0.1"
+description = "基于 LangGraph 的 RAG 问答 Agent：混合检索 + 重排 + 多轮压缩记忆 + Web 管理界面"
+readme = "README.md"
+license = { text = "MIT" }
+# langgraph dev（langgraph-api>=0.11）要求 Python>=3.11，故全项目统一 3.11+
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph>=1.0.0",
+    "python-dotenv>=1.0.1",
+    # langchain core
+    "langchain>=0.3.0",
+    "langchain-core>=0.3.0",
+    "langchain-community>=0.3.0",
+    # deepseek LLM
+    "langchain-deepseek>=0.1.0",
+    # OpenAI 兼容协议（通义千问/智谱/本地 vLLM 等接入时需要）
+    "langchain-openai>=0.2.0",
+    # vector database
+    "chromadb>=0.5.0",
+    "langchain-chroma>=0.2.0",
+    # document loader
+    "pypdf>=4.0.0",
+    # Markdown 按结构切分（langchain 官方独立切分包）
+    "langchain-text-splitters>=0.3.0",
+    # utils
+    "pydantic>=2.0.0",
+    # token 计数（utils/token_utils.py）
+    "tiktoken>=0.7.0",
+    # 管理接口 admin_server.py 顶层直接使用（线程池调度 + 异常类型）
+    "anyio>=4.7.0",
+    "starlette>=0.40.0",
+    # torch 必须声明为直接依赖：uv 的 index source 只对直接依赖生效，
+    # 仅作为 sentence-transformers 的传递依赖时无法被下方 CPU 源接管
+    "torch>=2.0",
+    "sentence-transformers>=3.0.0",
+    # 本地开源嵌入模型（默认 bge 提供方依赖，BGE 系列）
+    "langchain-huggingface>=0.3.0",
+    # 中文关键词混合检索第二路（BM25 + jieba 分词）
+    "rank-bm25>=0.2.2",
+    "jieba>=0.42.1",
+]
+[project.optional-dependencies]
+# Milvus 生产级向量库（Chroma 已在核心依赖中）
+milvus = ["langchain-milvus>=0.1.5"]
+# Postgres + pgvector 向量库（PGVector，psycopg3 驱动）
+postgres = ["langchain-postgres>=0.0.17"]
+# 联网搜索兜底（Corrective-RAG）
+# 注：PyPI 上 langchain-tavily 最新仅到 0.2.18，不存在 0.3.x
+web = ["langchain-tavily>=0.2.18"]
+# RAG 效果评估
+eval = ["ragas>=0.2.0"]
+
+[tool.uv]
+# onnxruntime 是 chromadb 的传递依赖；固定 1.23.x 避免 chromadb 默认嵌入模型行为漂移
+# langgraph-api>=0.11 是 Studio session-name tracing 的硬性要求；
+# 不设下限解析器会回退到 0.7.x（其 grpcio 约束更宽松，在多环境切片下被优先选中）
+constraint-dependencies = ["onnxruntime<=1.23.2", "langgraph-api>=0.11.0"]
+
+# 直连 PyPI 速度慢，默认使用清华镜像
+[[tool.uv.index]]
+name = "tsinghua-pypi"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
+
+# 本机无 GPU：torch 强制使用 CPU wheel（上海交大镜像），
+# 否则默认 wheel 会连带下载数 GB 的 nvidia CUDA 13 库
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://mirror.sjtu.edu.cn/pytorch-wheels/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[build-system]
+requires = ["setuptools>=83.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["agent*"]
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
+[tool.ruff]
+lint.select = [
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "I",    # isort
+    "D",    # pydocstyle
+    "D401", # First line should be in imperative mood
+    "T201",
+    "UP",
+]
+lint.ignore = [
+    "UP006",
+    "UP007",
+    # We actually do want to import from typing_extensions
+    "UP035",
+    # Relax the convention by _not_ requiring documentation for every function parameter.
+    "D417",
+    "E501",
+]
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D", "UP"]
+# CLI 脚本本就需要 print 输出到终端
+"scripts/*" = ["T201"]
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+[dependency-groups]
+dev = [
+    "langgraph-cli[inmem]>=0.4.14",
+    "mypy>=1.13.0",
+    "pytest>=9.0.3",
+    "ruff>=0.8.2",
+]
+
+[tool.mypy]
+# 与 CI 的 mypy --strict 对齐：多余的 type: ignore 也要报错，防止豁免腐烂
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+# 可选后端依赖（redis/postgres extras）默认不安装；jieba 未提供 py.typed
+module = [
+    "jieba",
+    "redis",
+    "langgraph.checkpoint.redis",
+    "psycopg",
+    "psycopg.*",
+    "psycopg_pool",
+    "langgraph.checkpoint.postgres",
+    # postgres 向量库可选依赖（uv 安装时需带 --extra postgres）
+    "langchain_postgres",
+    "langchain_postgres.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+# 默认只跑离线快速单测；需要真实模型/外网/外部服务的测试用 -m integration 显式启用
+addopts = "-m 'not integration'"
+markers = [
+    "integration: 需要真实本地模型、外网 API 或外部服务的测试（默认跳过）",
+    "langsmith: 需要 LangSmith 观测能力的测试",
+]
+testpaths = ["tests"]

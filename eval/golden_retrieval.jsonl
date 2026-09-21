@@ -1,0 +1,23 @@
+# 检索回归黄金集：每行一个样例，expected_sources 写知识库相对 posix 路径
+# 维护原则：问题用真实用户口吻（含中文转述，不堆文档标题词）；标注用户意图
+# 指向的文档；跑 scripts/eval_retrieval.py 看命中率与分数分布。
+{"id": "g01", "question": "如何查看图的执行历史并回滚到之前某个状态？", "expected_sources": ["langgraph-docs/use-time-travel.md"], "note": "time travel 操作手册"}
+{"id": "g02", "question": "LangGraph 里怎么定义 subgraph 子图？父图调用子图时状态怎么传？", "expected_sources": ["langgraph-docs/use-subgraphs.md"], "note": "子图通信"}
+{"id": "g03", "question": "节点执行到一半想暂停等人审批后再继续，怎么实现？", "expected_sources": ["langgraph-docs/interrupts.md"], "note": "interrupt 人工介入"}
+{"id": "g04", "question": "@entrypoint 和 @task 装饰器的函数式写法怎么用？", "expected_sources": ["langgraph-docs/use-functional-api.md"], "note": "functional API 用法"}
+{"id": "g05", "question": "节点抛异常后怎么做自动重试和降级？", "expected_sources": ["langgraph-docs/fault-tolerance.md"], "note": "RetryPolicy 容错"}
+{"id": "g06", "question": "运行报错 GraphRecursionError 说超过递归上限，怎么调？", "expected_sources": ["langgraph-docs/errors/GRAPH_RECURSION_LIMIT.md", "langgraph-docs/graph-api.md", "langgraph-docs/use-graph-api.md"], "note": "错误页与 recursion_limit 配置文档均可"}
+{"id": "g07", "question": "报错说调用 get_state 之前必须先配置 checkpointer，怎么解决？", "expected_sources": ["langgraph-docs/errors/MISSING_CHECKPOINTER.md"], "note": "缺 checkpointer 错误页"}
+{"id": "g08", "question": "Orchestrator-worker 编排者工人模式怎么动态创建多个 worker 并行执行再汇总？", "expected_sources": ["langgraph-docs/workflows-agents.md"], "note": "Send 扇出 map-reduce 工作流"}
+{"id": "g09", "question": "想让不同对话线程共享同一份长期记忆，Store 怎么用？", "expected_sources": ["langgraph-docs/stores.md"], "note": "跨线程长期记忆"}
+{"id": "g10", "question": "想给助手加上记忆功能，从零开始的教程是哪篇？", "expected_sources": ["langgraph-docs/add-memory.md"], "note": "加记忆教程"}
+{"id": "g11", "question": "checkpointer 支持哪些存储后端？SqliteSaver 和 Postgres 怎么选？", "expected_sources": ["langgraph-docs/checkpointers.md"], "note": "checkpointer 后端清单"}
+{"id": "g12", "question": "怎么配置 checkpointer 把对话状态持久化，让服务重启后凭 thread_id 接着同一个会话继续？", "expected_sources": ["langgraph-docs/persistence.md"], "note": "持久化概念页"}
+{"id": "g13", "question": "LangChain 里 create_agent 怎么把工具绑给模型构建一个 Agent？", "expected_sources": ["langchain-docs/agents.md"], "note": "Agent 工厂"}
+{"id": "g14", "question": "怎么把 MCP server 暴露出来的工具接到我的 Agent 里？", "expected_sources": ["langchain-docs/mcp.md"], "note": "MCP 工具接入"}
+{"id": "g15", "question": "怎么给 Agent 加护栏防止它调用不该用的工具？", "expected_sources": ["langchain-docs/guardrails.md"], "note": "guardrails 概念页"}
+{"id": "g16", "question": "聊天历史越来越长，怎么裁剪旧消息控制 token？", "expected_sources": ["langchain-docs/short-term-memory.md"], "note": "trim_messages 短期记忆"}
+{"id": "g17", "question": "多个专业 Agent 之间怎么做任务交接（handoff）？", "expected_sources": ["langchain-docs/multi-agent/handoffs.md"], "note": "多 Agent 交接"}
+{"id": "g18", "question": "怎么离线评估一个 Agent 或链的效果好不好？", "expected_sources": ["langchain-docs/test/evals.md"], "note": "LangChain 评估文档"}
+{"id": "g19", "question": "怎么以流式方式接收图运行过程和模型输出的 token？", "expected_sources": ["langgraph-docs/streaming.md"], "note": "stream_mode 流式"}
+{"id": "g20", "question": "Pregel 引擎的 BSP 超步执行模型是什么原理？", "expected_sources": ["langgraph-docs/pregel.md"], "note": "Pregel 原理"}

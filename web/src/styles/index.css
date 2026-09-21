@@ -1,0 +1,267 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============ 便签风设计系统 ============ */
+:root {
+  --cork: #b08355;
+  --cork-dark: #8a5a34;
+  --ink: #4a3b26;
+  --ink-soft: #7a684c;
+  --note-yellow: #ffe98a;
+  --note-yellow-edge: #e6cc66;
+  --note-mint: #c9f0dc;
+  --note-mint-edge: #9ccfb3;
+  --tape: rgba(252, 246, 224, 0.62);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    "Noto Sans SC", system-ui, -apple-system, sans-serif;
+  /* 软木板：暖色底 + 多层大小不一的颗粒斑点 */
+  background-color: var(--cork);
+  background-image:
+    radial-gradient(circle at 18% 22%, rgba(0, 0, 0, 0.13) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 72% 64%, rgba(255, 235, 200, 0.16) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 42% 82%, rgba(0, 0, 0, 0.09) 0 1.6px, transparent 2.2px),
+    radial-gradient(circle at 85% 15%, rgba(0, 0, 0, 0.1) 0 1.3px, transparent 2px),
+    radial-gradient(circle at 8% 70%, rgba(255, 235, 200, 0.12) 0 1.4px, transparent 2px);
+  background-size:
+    22px 22px,
+    28px 28px,
+    37px 37px,
+    31px 31px,
+    41px 41px;
+}
+
+/* 软木板四周暗角，聚焦中间内容 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 55%,
+    rgba(60, 35, 15, 0.28) 100%
+  );
+  z-index: 0;
+}
+
+@layer components {
+  /* ---- 便签纸 ---- */
+  .note {
+    @apply relative px-5 py-4 shadow-note;
+    border-radius: 2px 2px 16px 2px;
+    transition:
+      transform 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+  .note-yellow {
+    background:
+      linear-gradient(160deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0) 45%),
+      var(--note-yellow);
+    border-bottom: 2px solid var(--note-yellow-edge);
+  }
+  .note-mint {
+    background:
+      linear-gradient(160deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 45%),
+      var(--note-mint);
+    border-bottom: 2px solid var(--note-mint-edge);
+  }
+  /* 底部卷边阴影 */
+  .note::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 20px;
+    border-radius: 0 0 16px 2px;
+    background: linear-gradient(to bottom, transparent, rgba(90, 60, 20, 0.08));
+    pointer-events: none;
+  }
+  .note-hover:hover {
+    transform: rotate(0deg) translateY(-2px) scale(1.005) !important;
+    @apply shadow-note;
+  }
+
+  /* ---- 胶带 ---- */
+  .tape {
+    @apply absolute -top-3 z-10 h-6 w-24;
+    left: 50%;
+    transform: translateX(-50%) rotate(-2deg);
+    background: linear-gradient(
+      100deg,
+      rgba(255, 255, 255, 0.22),
+      var(--tape) 30%,
+      rgba(255, 255, 255, 0.38) 70%,
+      rgba(255, 255, 255, 0.18)
+    );
+    border-left: 1px dashed rgba(255, 255, 255, 0.55);
+    border-right: 1px dashed rgba(255, 255, 255, 0.55);
+    box-shadow: 0 2px 4px rgba(74, 49, 20, 0.18);
+    backdrop-filter: blur(1px);
+  }
+  .tape-sm {
+    @apply h-5 w-16 -top-2.5;
+  }
+
+  /* ---- 图钉 ---- */
+  .pin {
+    @apply inline-block h-4 w-4 rounded-full shadow-pin;
+    background: radial-gradient(circle at 32% 30%, #ffb4a8, #e0524b 55%, #a82f2a);
+  }
+
+  /* ---- 横线纸输入区 ---- */
+  .lined-paper {
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 33px,
+        rgba(110, 145, 175, 0.32) 33px,
+        rgba(110, 145, 175, 0.32) 34px
+      ),
+      linear-gradient(#fffef8, #fffdf2);
+    background-position: 14px 12px;
+    line-height: 34px;
+  }
+
+  /* ---- 便签贴下动画 ---- */
+  .note-drop {
+    animation: note-drop 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  }
+}
+
+@keyframes note-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============ Markdown 正文（便签内） ============ */
+.note-body {
+  @apply text-[15px] leading-7 break-words;
+}
+.note-body > :first-child {
+  margin-top: 0;
+}
+.note-body > :last-child {
+  margin-bottom: 0;
+}
+.note-body h1,
+.note-body h2,
+.note-body h3 {
+  @apply font-bold mt-3 mb-1.5;
+}
+.note-body h1 {
+  @apply text-lg;
+}
+.note-body h2 {
+  @apply text-base;
+}
+.note-body h3 {
+  @apply text-[15px];
+}
+.note-body p {
+  @apply my-2;
+}
+.note-body ul {
+  @apply list-disc pl-5 my-2 space-y-1;
+}
+.note-body ol {
+  @apply list-decimal pl-5 my-2 space-y-1;
+}
+.note-body a {
+  @apply text-amber-800 underline underline-offset-2;
+}
+.note-body strong {
+  @apply font-bold;
+}
+.note-body blockquote {
+  @apply border-l-4 border-amber-700/40 pl-3 my-2 italic text-ink-soft;
+}
+.note-body code:not(pre code) {
+  @apply rounded px-1.5 py-0.5 text-[13px];
+  background: rgba(120, 85, 30, 0.12);
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, Menlo, monospace;
+}
+/* 代码块：白色撕纸条衬底，保证在彩色便签上清晰 */
+.note-body pre {
+  @apply my-3 overflow-x-auto rounded-md p-3 text-[13px] leading-5;
+  background: #fffef8;
+  border: 1px solid rgba(120, 85, 30, 0.22);
+  box-shadow: 0 2px 6px rgba(74, 49, 20, 0.15);
+}
+.note-body pre code {
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, Menlo, monospace;
+  background: transparent;
+  padding: 0;
+}
+/* highlight.js 语法配色（适配暖白纸条） */
+.hljs-comment,
+.hljs-quote {
+  color: #8a9a8b;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in {
+  color: #b5453c;
+}
+.hljs-string,
+.hljs-attr,
+.hljs-template-tag {
+  color: #4f7a3a;
+}
+.hljs-number,
+.hljs-literal {
+  color: #b07b22;
+}
+.hljs-title,
+.hljs-name,
+.hljs-function .hljs-title {
+  color: #3a5f8f;
+}
+.hljs-variable,
+.hljs-template-variable {
+  color: #8f5a9b;
+}
+.hljs-tag {
+  color: #7a684c;
+}
+
+/* ============ 滚动条（软木上的纸槽） ============ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(74, 49, 20, 0.35) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(74, 49, 20, 0.35);
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 打字光标 */
+.typing-caret::after {
+  content: "▍";
+  @apply text-ink-soft animate-pulse;
+}

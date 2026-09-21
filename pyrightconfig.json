@@ -1,0 +1,16 @@
+{
+  "include": ["src", "tests"],
+  "exclude": [
+    "**/.venv/**",
+    "**/__pycache__/**",
+    "**/chroma_db/**",
+    "**/node_modules/**"
+  ],
+  "extraPaths": ["src"],
+  "venvPath": ".",
+  "venv": ".venv",
+  "typeCheckingMode": "standard",
+  "useLibraryCodeForTypes": false,
+  "indexing": false,
+  "reportMissingTypeStubs": "none"
+}
